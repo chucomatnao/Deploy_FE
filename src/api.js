@@ -1,5 +1,5 @@
 import axios from "axios";
 
 export default axios.create({
-  baseURL: "http://localhost:5000/api", // backend URL
+  baseURL: "https://deploy-be-z08q.onrender.com/api", // URL backend Render
 });

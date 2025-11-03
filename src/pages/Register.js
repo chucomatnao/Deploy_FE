@@ -1,16 +1,25 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "../api";
 
 export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    // Gọi API register
-    navigate("/login");
+    try {
+      const res = await axios.post("/auth/register", { name, email, password });
+      if (res.status === 201 || res.data.success) {
+        alert("🎉 Đăng ký thành công! Hãy đăng nhập.");
+        navigate("/login");
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || "❌ Đăng ký thất bại!");
+    }
   };
 
   return (
@@ -39,6 +48,7 @@ export default function Register() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
           <button
             type="submit"
             className="w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 transition"

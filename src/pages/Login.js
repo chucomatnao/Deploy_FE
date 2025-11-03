@@ -1,16 +1,27 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "../api";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Gọi API login ở đây (fetch hoặc axios)
-    // Nếu login thành công:
-    navigate("/home");
+    try {
+      const res = await axios.post("/auth/login", { email, password });
+      if (res.data.token) {
+        localStorage.setItem("token", res.data.token);
+        alert("✅ Đăng nhập thành công!");
+        navigate("/home");
+      } else {
+        setError("Sai email hoặc mật khẩu!");
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || "❌ Đăng nhập thất bại!");
+    }
   };
 
   return (
@@ -32,6 +43,7 @@ export default function Login() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
           <button
             type="submit"
             className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition"
