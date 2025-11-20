@@ -1,18 +1,23 @@
+// ...existing code...
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { UserPlus } from "lucide-react";
+import { UserPlus, Mail, Lock } from "lucide-react";
 import axios from "../api";
+import AuthLayout from "../components/AuthLayout";
+import FormInput from "../components/FormInput";
 
 export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
     try {
       const res = await axios.post("/auth/register", { name, email, password });
       if (res.status === 201 || res.data.success) {
@@ -21,69 +26,67 @@ export default function Register() {
       }
     } catch (err) {
       setError(err.response?.data?.message || "❌ Đăng ký thất bại!");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500">
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="bg-white p-8 rounded-3xl shadow-2xl w-96"
-      >
-        <div className="flex justify-center mb-4">
-          <UserPlus size={40} className="text-pink-600" />
-        </div>
-        <h2 className="text-3xl font-bold mb-6 text-center text-pink-600">
-          Đăng ký tài khoản
-        </h2>
+    <AuthLayout
+      title="Tạo tài khoản"
+      subtitle="Nhanh chóng, bảo mật và dễ dàng quản lý thông tin của bạn."
+      asideLogo={<UserPlus size={56} />}
+    >
+      <form onSubmit={handleRegister} className="space-y-4">
+        <FormInput
+          icon={<UserPlus size={18} />}
+          type="text"
+          placeholder="Tên hiển thị"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          name="name"
+        />
 
-        <form onSubmit={handleRegister} className="space-y-5">
-          <input
-            type="text"
-            placeholder="Tên hiển thị"
-            className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <input
-            type="email"
-            placeholder="Email"
-            className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Mật khẩu"
-            className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+        <FormInput
+          icon={<Mail size={18} />}
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          name="email"
+        />
 
-          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+        <FormInput
+          icon={<Lock size={18} />}
+          type="password"
+          placeholder="Mật khẩu (>=6 ký tự)"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          minLength={6}
+          name="password"
+        />
 
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            type="submit"
-            className="w-full bg-pink-600 text-white py-3 rounded-lg font-semibold hover:bg-pink-700 transition"
-          >
-            Đăng ký
-          </motion.button>
+        {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
-          <p className="text-center text-sm mt-3 text-gray-600">
-            Đã có tài khoản?{" "}
-            <span
-              onClick={() => navigate("/login")}
-              className="text-pink-600 cursor-pointer hover:underline"
-            >
-              Đăng nhập
-            </span>
-          </p>
-        </form>
-      </motion.div>
-    </div>
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-pink-500 text-white py-3 rounded-lg font-semibold transition disabled:opacity-60"
+        >
+          {loading ? "Đang xử lý..." : "Đăng ký"}
+        </button>
+
+        <p className="text-center text-sm mt-1 text-gray-600">
+          Đã có tài khoản?{" "}
+          <span onClick={() => navigate("/login")} className="text-indigo-600 cursor-pointer hover:underline">
+            Đăng nhập
+          </span>
+        </p>
+      </form>
+    </AuthLayout>
   );
 }
+// ...existing code...
